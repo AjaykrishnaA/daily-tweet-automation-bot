@@ -11,6 +11,7 @@ It does **not** post directly to X/Twitter. Instead, each email includes an `htt
 - No X password or session cookies are stored.
 - You keep final human approval before anything goes public.
 - GitHub Actions can run the workflow daily on a schedule.
+- Optional Gemini Google Search grounding can be enabled for current-events drafts.
 
 ## How it works
 
@@ -84,6 +85,7 @@ Add any of these variables:
 | `TWEET_MAX_CHARS` | `280` | Max tweet length |
 | `EXTRA_INSTRUCTIONS` | empty | Extra prompt guidance |
 | `SMTP_USE_TLS` | `true` | Use STARTTLS on SMTP |
+| `ENABLE_GOOGLE_SEARCH_GROUNDING` | `false` | Enable Gemini Google Search grounding for current/factual topics |
 
 ### 5. Run manually once
 
@@ -105,7 +107,7 @@ The default schedule is:
 
 GitHub cron schedules use UTC.
 
-## Customizing for a niche
+## Customizing the bot
 
 For example, a daily learning or productivity bot could use:
 
@@ -116,6 +118,28 @@ EXTRA_INSTRUCTIONS=Prefer evergreen advice. Avoid exaggerated claims, fake urgen
 ```
 
 For live news updates, add a separate data-gathering step before the Gemini call. Do not ask the model to invent current events without sources.
+
+## Current-events mode
+
+By default, this bot does not give Gemini live internet access. It is best for evergreen drafts, recurring prompts, or source material you provide yourself.
+
+If you want current-events drafts, enable Gemini Google Search grounding:
+
+```text
+ENABLE_GOOGLE_SEARCH_GROUNDING=true
+BOT_TOPIC=one notable development today in AI tools, software, startups, or creator technology
+BOT_STYLE=neutral, concise, factual, and useful
+EXTRA_INSTRUCTIONS=Use only search-grounded information. Include source links. If sources are weak, write an evergreen observation instead of claiming breaking news.
+```
+
+When grounding is enabled, the email includes:
+
+- draft tweets,
+- a short evidence summary when Gemini provides one,
+- source links from the model response and grounding metadata,
+- the usual X composer link for manual posting.
+
+Grounding can have separate quota or billing behavior depending on your Gemini account, model, and region. Keep it disabled unless you actually need current information.
 
 ## Local test
 
