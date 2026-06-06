@@ -80,13 +80,14 @@ def call_gemini(api_key, model, prompt, enable_grounding):
                 "parts": [{"text": prompt}],
             }
         ],
-        "generationConfig": {
-            "responseMimeType": "application/json",
-        },
     }
 
     if enable_grounding:
         payload["tools"] = [{"google_search": {}}]
+    else:
+        payload["generationConfig"] = {
+            "responseMimeType": "application/json",
+        }
 
     request = urllib.request.Request(
         GEMINI_ENDPOINT.format(
