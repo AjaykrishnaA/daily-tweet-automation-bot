@@ -1,0 +1,51 @@
+name: Daily Tweet Draft
+
+on:
+  schedule:
+    # Runs every day at 13:00 UTC. Adjust this cron for your preferred time.
+    - cron: "0 13 * * *"
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: "Optional topic override for this run"
+        required: false
+        type: string
+      style:
+        description: "Optional style override for this run"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Generate and email tweet drafts
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          MAIL_FROM: ${{ secrets.MAIL_FROM }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+          SMTP_USE_TLS: ${{ vars.SMTP_USE_TLS }}
+          BOT_TOPIC: ${{ inputs.topic || vars.BOT_TOPIC }}
+          BOT_STYLE: ${{ inputs.style || vars.BOT_STYLE }}
+          BOT_COUNT: ${{ vars.BOT_COUNT }}
+          BOT_MODEL: ${{ vars.BOT_MODEL }}
+          TWEET_MAX_CHARS: ${{ vars.TWEET_MAX_CHARS }}
+          EXTRA_INSTRUCTIONS: ${{ vars.EXTRA_INSTRUCTIONS }}
+        run: python scripts/generate_tweet_draft_email.py
